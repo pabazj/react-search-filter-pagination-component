@@ -1,5 +1,12 @@
 # An example university list component to play with data fetching, seraching, filtering and pagination
 
+- Custom hook to fetch data with Fetch API and with Axios
+- Material UI for the UI components
+- Display data list from "http://universities.hipolabs.com/search" with more than 9000 records
+- Search function
+- Filter function
+- Pagination to reduce the list of items and to increase performance
+
 In the project directory, you can run:
 
 ### `npm start`

@@ -78,7 +78,7 @@ export default function UniversityList(props) {
 
             </Grid>
             <LoadMoreWrapper>
-               {uniList?.length != 0 ? <Button variant="contained" color="success" onClick={load_more}>Load More</Button> : null}
+               {uniList?.length > 9 ? <Button variant="contained" color="success" onClick={load_more}>Load More</Button> : null}
             </LoadMoreWrapper>
 
         </>
