@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import uniqid from 'uniqid';
 
 import Typography from '@mui/material/Typography';
@@ -13,10 +13,10 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import { styled } from '@mui/material/styles';
 
-import debounce from 'lodash.debounce';
-import axios from 'axios';
-
 import UniversityList from './components/UniversityList'
+import useFetch from './customHooks/useFetch'
+
+import debounce from 'lodash.debounce';
 
 const baseURL = "http://universities.hipolabs.com/search";
 
@@ -40,78 +40,26 @@ const SelecterWrapperDiv = styled('div')(({ theme }) => ({
 
 function App() {
 
-  const [universities, setUniversities] = useState([]);
-  const [loaded, setLoaded] = useState(false);
   const [code, setCode] = useState('Select by Code');
-  const [codeList, setCodeList] = useState([]);
+  const [searchTearm, setSearchTearm] = useState('');
+
+  let { universities, loaded, codeList, searchList, getData, getSearchResults, setSearchList } = useFetch(baseURL, searchTearm)
 
   useEffect(() => {
     getData()
   }, [])
 
-  const getData = () => {
+  useEffect(() => {
+    if (searchTearm !== '') {
+      getSearchResults()
+    }
+    else {
+      setSearchList([])
+    }
+  }, [searchTearm])
 
-    // Get data using fetch
-    fetch(baseURL)
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          setLoaded(true);
-          setUniversities(result);
-
-          const filteredCodes = [...new Set(result.map(item => item.alpha_two_code))]
-          setCodeList(filteredCodes)
-        }
-      )
-
-
-    // Get data using axios
-    /*
-    axios.get(baseURL)
-      .then(
-        (result) => {
-          setLoaded(true);
-          setUniversities(result.data);
-
-          const filteredCodes = [...new Set(result.map(item => item.alpha_two_code))]
-          setCodeList(filteredCodes)
-        }
-      ) 
-      */  
-
-  }
-
-  const handleSearch = debounce((serchTerm) => {
-
-    let formatSerchTerm = serchTerm.split(' ').join('+')
-
-    fetch(`${baseURL}?country=${formatSerchTerm}`)
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          setLoaded(true);
-          setUniversities(result)
-        }
-      )
-
-      // Get data using axios with parameters
-      /*
-      axios.get(baseURL, {
-        params: {
-          country: formatSerchTerm
-        }
-      })
-      .then(
-        (result) => {
-          setLoaded(true);
-          setUniversities(result.data);
-
-          const filteredCodes = [...new Set(result?.data.map(item => item.alpha_two_code))]
-          setCodeList(filteredCodes)
-        }
-      )
-      */
-
+  const handleSearch = debounce((country) => {
+    setSearchTearm(country)
   }, 1000)
 
   const handleCodeChange = (event) => {
@@ -124,9 +72,15 @@ function App() {
     } else return university;
   };
 
-  const handleUniList = (universities, code) => {
-    return universities
-      .filter(university => byCategory(university, code))
+  const handleUniList = (universities, code, searchList) => {
+
+    if (searchTearm !== '') {
+      return searchList
+    }
+    else {
+      return universities
+        .filter(university => byCategory(university, code))
+    }
   }
 
   if (!loaded) {
@@ -182,7 +136,7 @@ function App() {
               </FormControl>
             </SelecterWrapperDiv>
           </div>
-          <UniversityList uniList={handleUniList(universities, code)} />
+          <UniversityList uniList={handleUniList(universities, code, searchList)} />
         </HeaderWrapperDiv>
       </Box>
     </Container>
